@@ -2,7 +2,6 @@ package me.rijul.brightnessvolumeslider;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,8 +13,6 @@ import de.robv.android.xposed.IXposedHookLoadPackage;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 import de.robv.android.xposed.callbacks.XC_LayoutInflated;
@@ -61,7 +58,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
                 brightnessIcon.setVisibility(View.VISIBLE);
                 plusLayout1.addView(toggleSlider);
 
-                LinearLayout plusLayout2 = (LinearLayout) LayoutInflater.from(moduleContext).inflate(R.layout.volume_slider, brightnessView, false);
+                LinearLayout plusLayout2 = (LinearLayout) LayoutInflater.from(moduleContext).inflate(R.layout.ringer_slider, brightnessView, false);
                 brightnessView.addView(plusLayout1);
                 brightnessView.addView(plusLayout2);
 
@@ -73,11 +70,12 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
                         XposedHelpers.setObjectField(param.thisObject, "mContentDescription", (CharSequence) "Random accessibility description");
                     }
                 });
+
                 RelativeLayout volumeSlider = (RelativeLayout) XposedHelpers.newInstance(ToggleSlider, context);
                 LinearLayout.LayoutParams llp = (LinearLayout.LayoutParams) toggleSlider.getLayoutParams();
                 volumeSlider.setLayoutParams(llp);
-                plusLayout2.removeView(plusLayout2.findViewById(R.id.volume_slider));
-                volumeSlider.setId(R.id.volume_slider);
+                plusLayout2.removeView(plusLayout2.findViewById(R.id.ringer_slider));
+                volumeSlider.setId(R.id.ringer_slider);
                 plusLayout2.addView(volumeSlider);
             }
         });
