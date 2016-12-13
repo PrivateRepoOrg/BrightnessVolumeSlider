@@ -28,26 +28,6 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
-//        if (lpparam.packageName.equals("com.android.systemui")) {
-//            Class<?> QSPanel = XposedHelpers.findClass("com.android.systemui.qs.QSPanel", lpparam.classLoader);
-//            XposedHelpers.findAndHookMethod(QSPanel, "showBrightnessSlider", new XC_MethodHook() {
-//                @Override
-//                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-//                    super.beforeHookedMethod(param);
-//
-//                    View view = (View) param.thisObject;
-//                    Context context = view.getContext();
-//                    int sliderId = context.getResources().getIdentifier("brightness_slider", "id", lpparam.packageName);
-//                    View brightnessSlider = (View) XposedHelpers.callMethod(param.thisObject, "findViewById", sliderId);
-//                    brightnessSlider.setVisibility(View.GONE);
-//
-//                    View mBrightnessView = (View) XposedHelpers.getObjectField(param.thisObject, "mBrightnessView");
-//                    mBrightnessView.setVisibility(View.VISIBLE);
-//
-//                    param.setResult(true);
-//                }
-//            });
-//        }
     }
 
     @Override
@@ -75,26 +55,30 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
                 RelativeLayout toggleSlider = (RelativeLayout) brightnessView.findViewById(sliderId);
                 brightnessView.removeView(toggleSlider);
 
-
-/*
-                LinearLayout.LayoutParams llp = (LinearLayout.LayoutParams) toggleSlider.getLayoutParams();
-                Class<?> toggleSliderClass = XposedHelpers.findClass("com.android.systemui.settings.ToggleSlider", toggleSlider.getClass().getClassLoader());
-                XposedBridge.log("[BrightnessVolumeSlider] toggleSliderClass is null ? " + (toggleSliderClass==null));
-                XposedHelpers.findAndHookMethod(toggleSliderClass, "getContentDescription", XC_MethodReplacement.returnConstant("Fuck!"));
-                RelativeLayout newToggleSlider = (RelativeLayout) XposedHelpers.newInstance(toggleSliderClass, context);
-
-                newToggleSlider.setLayoutParams(llp);
-                newToggleSlider.setId(sliderId);
-*/
                 LinearLayout plusLayout1 = (LinearLayout) LayoutInflater.from(moduleContext).inflate(R.layout.brightness_slider, null);
                 plusLayout1.addView(brightnessIcon);
                 toggleSlider.setVisibility(View.VISIBLE);
                 brightnessIcon.setVisibility(View.VISIBLE);
                 plusLayout1.addView(toggleSlider);
 
-                LinearLayout plusLayout2 = (LinearLayout) LayoutInflater.from(moduleContext).inflate(R.layout.volume_slider, null);
+                LinearLayout plusLayout2 = (LinearLayout) LayoutInflater.from(moduleContext).inflate(R.layout.volume_slider, brightnessView, false);
                 brightnessView.addView(plusLayout1);
                 brightnessView.addView(plusLayout2);
+
+                Class<?> ToggleSlider = XposedHelpers.findClass("com.android.systemui.settings.ToggleSlider", toggleSlider.getClass().getClassLoader());
+                XposedHelpers.findAndHookConstructor(ToggleSlider, Context.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedHelpers.setObjectField(param.thisObject, "mContentDescription", (CharSequence) "Random accessibility description");
+                    }
+                });
+                RelativeLayout volumeSlider = (RelativeLayout) XposedHelpers.newInstance(ToggleSlider, context);
+                LinearLayout.LayoutParams llp = (LinearLayout.LayoutParams) toggleSlider.getLayoutParams();
+                volumeSlider.setLayoutParams(llp);
+                plusLayout2.removeView(plusLayout2.findViewById(R.id.volume_slider));
+                volumeSlider.setId(R.id.volume_slider);
+                plusLayout2.addView(volumeSlider);
             }
         });
     }
