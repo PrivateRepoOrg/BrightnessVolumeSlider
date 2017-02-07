@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="borderless_button_radius">2dp</dimen>
+    <dimen name="volume_button_size">40dp</dimen>
+    <dimen name="seekbar_z_index">5000dp</dimen>
+</resources>
